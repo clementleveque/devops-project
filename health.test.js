@@ -6,6 +6,6 @@ const app = require('./app');
 test('GET /health returns OK', async () => {
     const response = await request(app).get('/health');
 
-    assert.equal(response.status, 201);
+    assert.equal(response.status, 200);
     assert.equal(response.text, 'OK');
 });
