@@ -18,4 +18,10 @@ REPOSITORY   TAG       IMAGE ID       CREATED          SIZE
 myapp        full      9bffce4518b4   23 seconds ago   1.14GB
 myapp        0.1       45a65a61e949   7 minutes ago    177MB
 
-4) 
+4) Why tag the image with the commit SHA rather than latest?
+
+Tagging a Docker image with the commit SHA ensures traceability and reproducibility. Each image can be linked to a specific version of the source code. Unlike the latest tag, which can change over time, a SHA-based tag uniquely identifies the commit used to build the image, making debugging and rollbacks easier.
+
+5) What does “fail fast” mean in a pipeline?
+
+Fail fast means detecting errors as early as possible in the CI/CD pipeline and stopping subsequent dependent steps when a failure occurs. This saves time and resources and prevents faulty code from being deployed.
