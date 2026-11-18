@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: prod
+
+resources:
+  - ../../base
+
+replicas:
+  - name: myapp
+    count: 5
+
+images:
+  - name: ghcr.io/clementleveque/devops-project
+    newTag: 369b1fbe18a7f040c29c36bbcc0629a528821f8b
+
+labels:
+  - pairs:
+      env: prod
+    includeTemplates: true
