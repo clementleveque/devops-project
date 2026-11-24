@@ -28,8 +28,9 @@ jobs:
 
       - name: Initialize configurations
         run: |
+          mkdir -p infra/state
           terraform -chdir=infra/quickstart init -backend=false -input=false
-          terraform -chdir=infra/envs/dev init -backend=false -input=false
+          terraform -chdir=infra/envs/dev init -reconfigure -input=false
           terraform -chdir=infra/envs/staging init -backend=false -input=false
           terraform -chdir=infra/preview init -backend=false -input=false
 
