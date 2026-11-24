@@ -1,0 +1,22 @@
+terraform {
+  required_providers {
+    docker = {
+      source  = "kreuzwerker/docker"
+      version = "~> 3.0"
+    }
+  }
+}
+
+resource "docker_image" "web" {
+  name = var.image
+}
+
+resource "docker_container" "web" {
+  name  = "tf-web-${var.env_name}"
+  image = docker_image.web.image_id
+
+  ports {
+    internal = 80
+    external = var.external_port
+  }
+}

@@ -1,0 +1,77 @@
+name: Terraform CI
+
+on:
+  pull_request:
+    paths:
+      - "infra/**"
+      - ".github/workflows/terraform.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-plan:
+    name: Terraform Validate and Plan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.17.2"
+
+      - name: Check formatting
+        run: terraform fmt -check -recursive infra
+
+      - name: Initialize configurations
+        run: |
+          terraform -chdir=infra/quickstart init -backend=false -input=false
+          terraform -chdir=infra/envs/dev init -backend=false -input=false
+          terraform -chdir=infra/envs/staging init -backend=false -input=false
+          terraform -chdir=infra/preview init -backend=false -input=false
+
+      - name: Validate configurations
+        run: |
+          terraform -chdir=infra/quickstart validate
+          terraform -chdir=infra/envs/dev validate
+          terraform -chdir=infra/envs/staging validate
+          terraform -chdir=infra/preview validate
+
+      - name: Terraform Plan DEV
+        run: |
+          terraform -chdir=infra/envs/dev plan \
+            -input=false \
+            -lock=false \
+            -var="env_name=dev" \
+            -var="image=nginx:1.27" \
+            -var="external_port=8083" \
+            -out=dev.tfplan
+
+      - name: Export plan
+        run: terraform -chdir=infra/envs/dev show -no-color dev.tfplan > terraform-plan.txt
+
+      - name: Upload plan artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan
+          path: terraform-plan.txt
+          retention-days: 1
+
+  security:
+    name: Terraform Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Scan Terraform with Trivy
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: config
+          scan-ref: infra
+          severity: HIGH,CRITICAL
+          exit-code: "1"
